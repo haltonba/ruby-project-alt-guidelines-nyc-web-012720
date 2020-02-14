@@ -10,4 +10,5 @@ gem "faker"
 gem 'rest-client'
 gem 'json'
 gem 'tty-prompt'
+gem 'rainbow'
 

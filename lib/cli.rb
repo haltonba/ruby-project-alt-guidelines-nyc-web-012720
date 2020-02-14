@@ -4,11 +4,41 @@ class CommandLine
 
     @@main_user = nil
 
+    def welcome
+    puts Rainbow("\n\n                888                               .d8888b.           888    888          888 888                     d8b                          
+                888                              d88P  '88b          888    888          888 888                     88P                          
+                888                              Y88b. d88P          888    888          888 888                     8P                           
+                888       .d88b.  888  888        'Y8888P'           8888888888  8888b.  888 888888  .d88b.  88888b. '  .d8888b                   
+                888      d88''88b 888  888       .d88P88K.d88P       888    888     '88b 888 888    d88''88b 888 '88b   88K                       
+                888      888  888 888  888       888'  Y888P'        888    888 .d888888 888 888    888  888 888  888   'Y8888b.                  
+                888      Y88..88P Y88b 888       Y88b .d8888b        888    888 888  888 888 Y88b.  Y88..88P 888  888        X88                  
+                88888888  'Y88P'   'Y88888        'Y8888P' Y88b      888    888 'Y888888 888  'Y888  'Y88P'  888  888    88888P'
+         \n\n
+         88888888888 d8b          888               888          8888888888                   888                                          
+             888     Y8P          888               888          888                          888                                          
+             888                  888               888          888                          888                                          
+             888     888  .d8888b 888  888  .d88b.  888888       8888888    888  888  .d8888b 88888b.   8888b.  88888b.   .d88b.   .d88b.  
+             888     888 d88P'    888 .88P d8P  Y8b 888          888        `Y8bd8P' d88P'    888 '88b     '88b 888 '88b d88P'88b d8P  Y8b 
+             888     888 888      888888K  88888888 888          888          X88K   888      888  888 .d888888 888  888 888  888 88888888 
+             888     888 Y88b.    888 '88b Y8b.     Y88b.        888        .d8''8b. Y88b.    888  888 888  888 888  888 Y88b 888 Y8b.     
+             888     888  'Y8888P 888  888  'Y8888   'Y888       8888888888 888  888  'Y8888P 888  888 'Y888888 888  888  'Y88888  'Y8888  
+                                                                                                                             888          
+                                                                                                                        Y8b d88P          
+                                                                                                                         'Y88P'           
+                                                                                                                         ").royalblue
+    end 
+
+
+
+
     def introduction
         if !@@main_user
-            puts "What is your name?"
-            attendee_name = gets.chomp
+            attendee_name = @@prompt.ask("Enter your name:") 
+            # while attendee_name != String
+            #     attendee_name = @@prompt.ask("Please enter a valid name ") 
+            # end 
             @@main_user = Attendee.find_or_create_by(name: attendee_name)
+            puts "Welcome #{attendee_name}! \n What would you like to do? \n"
         end
         @@main_user
     end
@@ -35,10 +65,11 @@ class CommandLine
             view_tickets
             menu_controller
         when  3
-            change_tickets
+            delete_ticket
             puts "Your ticket has been removed from your order. Thank you for choosing Lou & Halton's Ticket Exchange!"
+            menu_controller
         when 4
-            puts "Your ticket has been removed from your order. Thank you for choosing Lou & Halton's Ticket Exchange!"
+            puts "Thank you for choosing Lou & Halton's Ticket Exchange!"
         end 
     end
 
@@ -97,14 +128,12 @@ class CommandLine
         puts "Be sure to arrive with $#{ticket_quantity * 20} at the door." 
     end
 
-    def view_tickets
-        # attendees_tickets = Ticket.where("attendee_id = ? ",  @@main_user.id)
-        attendees_events = @@main_user.events
+    def view_tickets  
+        attendees_events = @@main_user.reload.events
         display_array = []
         attendees_events.uniq.select do |event|
             display_array << event
         end
-
         compare_array = []
         display_array.each do |e|
             attendees_events.each do |d|
@@ -118,43 +147,22 @@ class CommandLine
         end
     end
 
-    def change_tickets
-        # binding.pry
+    def delete_ticket
 
-        attendees_tickets = @@main_user.events 
+        events_array = @@main_user.events 
         delete_ticket = @@main_user.tickets
-
-        
 
         selected = @@prompt.select("DELETE A TICKET\n ") do |menu|
             j=0
-            attendees_tickets.each do |i| 
+            events_array.each do |i| 
                 menu.default 1
-                # binding.pry
-                menu.choice "Event: #{attendees_tickets[j].event_name} \n  Venue: #{attendees_tickets[j].venue} \n  Date: #{attendees_tickets[j].date} | Time: #{attendees_tickets[j].time} \n" + ("=" * 60), (j+1)
+                menu.choice "Event: #{events_array[j].event_name} \n  Venue: #{events_array[j].venue} \n  Date: #{events_array[j].date} | Time: #{events_array[j].time} \n" + ("=" * 60), (j+1)
                 j+=1
             end 
         end
         Ticket.find(delete_ticket[selected - 1].id).delete
         
     end 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     
 end
